@@ -28,7 +28,7 @@ public class TOW implements Serializable {
     private byte[] dataBytes;
     private int dataLength;
 
-    public TOW(int identifier, InetAddress destIP, int destPort, String data) throws UnknownHostException{
+    public TOW(int identifier, InetAddress destIP, int destPort, String data, int packetNumber) throws UnknownHostException{
         this.protocolVersion = 1.0;
         this.IP = InetAddress.getLocalHost();
         this.length = new byte[1024];
@@ -36,7 +36,7 @@ public class TOW implements Serializable {
         this.port = 5000;
         this.timestamp = System.currentTimeMillis();
 
-        this.packetNumber = 1;
+        this.packetNumber = packetNumber;
 
         this.destIP = IP;
         this.destPort = port;
