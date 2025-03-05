@@ -5,6 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class TOW implements Serializable {
     private final String protocolName = "TOW";
@@ -85,11 +88,14 @@ public class TOW implements Serializable {
         return timestamp;
     }
 
+    public String readableTimestamp(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+        return formatter.format(Instant.ofEpochMilli(timestamp));
+    }
     
-
 
     @Override
     public String toString(){
-        return "TOW Packet version " + protocolVersion + ", sent from node " + identifier + " at IP " + IP + " to " + destIP + " on port " + destPort + ". \n  Message: " + data + ", time: " + timestamp;
+        return "TOW Packet version " + protocolVersion + ", sent from node " + identifier + " at IP " + IP + " to " + destIP + " on port " + destPort + ". \n  Message: " + data + ", time: " + readableTimestamp();
     }
 }

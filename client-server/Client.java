@@ -6,9 +6,19 @@ public class Client {
     DatagramSocket socket;
     private int clientIdentifier;
     private static SecureRandom random = new SecureRandom();
+    private final int MAX_CLIENTS = 6; // lets the user decide how many clients there are
+    private boolean[] clientIsAlive = new boolean[MAX_CLIENTS]; // keeps track of which clients are alive and which are dead
 
     public Client(int id) {
         this.clientIdentifier = id;
+        clientIsAlive[id - 1] = true;
+        for(int i = 0; i < MAX_CLIENTS; i++){
+            if(i == (id - 1)){
+                // do nothing
+            }else{
+                clientIsAlive[i] = false;
+            }
+        }
     }
 
     public void createAndListenSocket() {

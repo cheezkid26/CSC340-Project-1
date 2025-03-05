@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 
 public class TOW implements Serializable {
     private final String protocolName = "TOW";
-    private double protocolVersion;
+    private final double protocolVersion = 1.0;
     private byte[] length;
     
     private InetAddress IP;
@@ -28,8 +28,11 @@ public class TOW implements Serializable {
     private byte[] dataBytes;
     private int dataLength;
 
+
+    private boolean[] clientStatus = new boolean[6];
+
+    //sent from client
     public TOW(int identifier, InetAddress destIP, int destPort, String data, int packetNumber) throws UnknownHostException{
-        this.protocolVersion = 1.0;
         this.IP = InetAddress.getLocalHost();
         this.length = new byte[1024];
         this.identifier = identifier;
@@ -44,6 +47,15 @@ public class TOW implements Serializable {
         this.data = data;
         this.dataBytes = data.getBytes();
         this.dataLength = dataBytes.length;
+    }
+
+    //response from server
+    public TOW(int port, InetAddress destIP, int destPort, boolean[] aliveClients){
+        this.length = new byte[1024];
+        this.port = 9876;
+        this.timestamp = System.currentTimeMillis();
+        this.identifier = 0; // server's ID defaults to 0
+        clientStatus = aliveClients;
     }
 
     //simple getters and setters
@@ -62,6 +74,10 @@ public class TOW implements Serializable {
 
     public InetAddress getSenderIP(){
         return this.IP;
+    }
+    
+    public int getSenderPort(){
+        return port;
     }
 
     public int getDestPort(){
@@ -86,6 +102,14 @@ public class TOW implements Serializable {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public int getPacketNumber(){
+        return packetNumber;
+    }
+
+    public boolean[] getClientStatuses(){
+        return clientStatus;
     }
 
     public String readableTimestamp(){
