@@ -1,8 +1,6 @@
 //TOW - Transfer Over Wi-FI
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+
 import java.io.Serializable;
 import java.net.*;
 import java.time.Instant;
@@ -11,15 +9,13 @@ import java.time.format.DateTimeFormatter;
 
 public class TOW implements Serializable {
     private final String protocolName = "TOW";
-    private double protocolVersion;
+    private final double protocolVersion = 1.0;
     private byte[] length;
     
     private InetAddress IP;
     private int identifier;
     private int port;
     private long timestamp;
-
-    private int packetNumber;
 
     private InetAddress destIP;
     private int destPort;
@@ -28,15 +24,16 @@ public class TOW implements Serializable {
     private byte[] dataBytes;
     private int dataLength;
 
-    public TOW(int identifier, InetAddress destIP, int destPort, String data, int packetNumber) throws UnknownHostException{
-        this.protocolVersion = 1.0;
+
+    private boolean[] clientStatus = new boolean[6];
+
+    //sent from client
+    public TOW(int identifier, InetAddress destIP, int destPort, String data) throws UnknownHostException{
         this.IP = InetAddress.getLocalHost();
-        this.length = new byte[1024];
+        this.length = new byte[2048];
         this.identifier = identifier;
         this.port = 5000;
         this.timestamp = System.currentTimeMillis();
-
-        this.packetNumber = packetNumber;
 
         this.destIP = IP;
         this.destPort = port;
@@ -45,6 +42,35 @@ public class TOW implements Serializable {
         this.dataBytes = data.getBytes();
         this.dataLength = dataBytes.length;
     }
+
+    //response from server
+    public TOW(InetAddress destIP, int destPort, boolean[] aliveClients) throws UnknownHostException{
+        this.IP = InetAddress.getLocalHost();
+        this.length = new byte[2048];
+        this.identifier = 0;
+        this.port = 5000;
+        this.timestamp = System.currentTimeMillis();
+
+        this.destIP = IP;
+        this.destPort = port;
+
+        this.data = "You have been marked as alive.";
+        this.dataBytes = data.getBytes();
+        this.dataLength = dataBytes.length;
+        this.clientStatus = aliveClients;
+    }
+        /* 
+        this.length = new byte[2048];
+        this.port = 9876;
+        this.timestamp = System.currentTimeMillis();
+        this.identifier = 0; // server's ID defaults to 0
+        this.data = "You have been marked as alive.";
+        clientStatus = aliveClients;
+
+        this.IP = InetAddress.getLocalHost();
+        this.destIP = destIP;
+        this.destPort = destPort;
+        */
 
     //simple getters and setters
     public void setDestination(InetAddress destIP, int destPort){
@@ -63,6 +89,10 @@ public class TOW implements Serializable {
     public InetAddress getSenderIP(){
         return this.IP;
     }
+    
+    public int getSenderPort(){
+        return port;
+    }
 
     public int getDestPort(){
         return this.destPort;
@@ -70,6 +100,10 @@ public class TOW implements Serializable {
 
     public byte[] getData(){
         return this.dataBytes;
+    }
+    
+    public byte[] getDataLength(){
+        return this.length;
     }
 
     public String getProtocolName(){
@@ -86,6 +120,10 @@ public class TOW implements Serializable {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public boolean[] getClientStatuses(){
+        return clientStatus;
     }
 
     public String readableTimestamp(){
