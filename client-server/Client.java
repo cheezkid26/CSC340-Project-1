@@ -17,7 +17,7 @@ public class Client {
 
     public Client(int id) throws IOException {
         this.clientIdentifier = id;
-        this.serverAddress = InetAddress.getByName("localhost");
+        this.serverAddress = InetAddress.getByName("10.0.0.190"); //InetAddress.getByName("localhost");
         this.socket = new DatagramSocket();
         this.lastContact = System.currentTimeMillis();
         this.serverIsDead = false;
@@ -83,7 +83,7 @@ public class Client {
                     socket.setSoTimeout((int) TIMEOUT * 5); // Waits longer than the normal timeout time, to avoid going offline if the server is having momentary issues
                     socket.receive(incomingPacket);
 
-                    // Deserialize the TOW object
+                    // Deserialize the TOW packet
                     ByteArrayInputStream byteInputStream = new ByteArrayInputStream(incomingPacket.getData(), 0, incomingPacket.getLength());
                     ObjectInputStream objectInputStream = new ObjectInputStream(byteInputStream);
                     TOW receivedPacket = (TOW) objectInputStream.readObject();
@@ -91,7 +91,7 @@ public class Client {
                     clientIsAlive = receivedPacket.getClientStatuses();
                     lastContact = receivedPacket.getTimestamp();
 
-                    System.out.println(receivedPacket.getData());
+                    System.out.println(receivedPacket.getString());
                     // Print client statuses
                     System.out.println("Status of other clients:");
                     for (int i = 0; i < MAX_CLIENTS; i++) {

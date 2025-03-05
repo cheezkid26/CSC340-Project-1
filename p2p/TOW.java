@@ -101,6 +101,10 @@ public class TOW implements Serializable {
     public byte[] getData(){
         return this.dataBytes;
     }
+
+    public String getString(){
+        return this.data;
+    }
     
     public byte[] getDataLength(){
         return this.length;
