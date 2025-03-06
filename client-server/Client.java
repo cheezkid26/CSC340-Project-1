@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class Client {
@@ -55,7 +55,7 @@ public class Client {
                     Thread.sleep(waitTime);
 
                     // Reads in the currently existing file names
-                    clientFiles = getFileNames(new File("C:/CSC340 Project Files"));
+                    clientFiles = getFileNames();
 
                     // Create a TOW packet
                     TOW packet = new TOW(clientIdentifier, serverAddress, 9876, "I am alive!", clientFiles);
@@ -133,7 +133,9 @@ public class Client {
         });
     }
 
-    private ArrayList<String> getFileNames(File directory) {
+    // Reads in file names
+    private ArrayList<String> getFileNames() {
+        File directory = new File(System.getProperty("user.dir") + File.separator + "home"); 
         ArrayList<String> fileNames = new ArrayList<>();
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
@@ -148,9 +150,13 @@ public class Client {
         return fileNames;
     }
 
+
     public static void main(String[] args) throws IOException {
-        int clientId = random.nextInt(6) + 1; // Generate a random client ID (1-6) - this will be replaced later down the line
-        Client client = new Client(clientId);
+        Scanner input = new Scanner(System.in);
+        System.out.println("Which client is this? (Whole numbers only.)");
+        int clientID = input.nextInt();
+        Client client = new Client(clientID);
+        input.close();
         client.start(); // Start sending and listening
     }
 }

@@ -23,7 +23,7 @@ public class Server {
         for (int i = 0; i < MAX_CLIENTS; i++) {
             clientIsAlive[i] = false;
             lastSeen[i] = System.currentTimeMillis();
-            lastPacketTime[i] = 0; // Ensures packets are always "newer"
+            lastPacketTime[i] = 0; // Ensures the first arriving packets are always considered the newest ones
         }
 
         for(int i = 0; i < MAX_CLIENTS; i++){
