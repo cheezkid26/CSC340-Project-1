@@ -12,10 +12,9 @@ public class Server {
     private long[] lastPacketTime = new long[MAX_CLIENTS]; // Tracks last packet timestamp per client
     public InetAddress[] IPs = new InetAddress[MAX_CLIENTS]; // Tracks client IPs
 
-    public Server(int port, int threadPoolSize) throws SocketException {
+    public Server(int port, int threadPoolSize) throws SocketException, UnknownHostException {
         socket = new DatagramSocket(port);
         threadPool = Executors.newFixedThreadPool(threadPoolSize);
-
         // Initially, all clients are marked as dead
         for (int i = 0; i < MAX_CLIENTS; i++) {
             clientIsAlive[i] = false;
@@ -108,7 +107,7 @@ public class Server {
         }
     }
 
-    public static void main(String[] args) throws SocketException {
+    public static void main(String[] args) throws SocketException, UnknownHostException {
         Server server = new Server(9876, 10);
         server.start();
     }
