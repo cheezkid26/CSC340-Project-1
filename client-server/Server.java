@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
+import java.util.ArrayList;
 
 public class Server {
     private DatagramSocket socket;
@@ -10,7 +11,10 @@ public class Server {
     private boolean[] clientIsAlive = new boolean[MAX_CLIENTS]; // Tracks which clients are alive
     private long[] lastSeen = new long[MAX_CLIENTS]; // Tracks last time each client was seen
     private long[] lastPacketTime = new long[MAX_CLIENTS]; // Tracks last packet timestamp per client
-    public InetAddress[] IPs = new InetAddress[MAX_CLIENTS]; // Tracks client IPs
+    //private InetAddress[] IPs = new InetAddress[MAX_CLIENTS]; // Tracks client IPs
+    private ArrayList<ArrayList<String>> allFiles = new ArrayList<ArrayList<String>>();
+
+
 
     public Server(int port, int threadPoolSize) throws SocketException, UnknownHostException {
         socket = new DatagramSocket(port);
@@ -21,6 +25,10 @@ public class Server {
             lastSeen[i] = System.currentTimeMillis();
             lastPacketTime[i] = 0; // Ensures packets are always "newer"
         }
+
+        for(int i = 0; i < MAX_CLIENTS; i++){
+            allFiles.add(new ArrayList<String>());
+        }
     }
 
     public void start() {
@@ -30,12 +38,11 @@ public class Server {
             try {
                 byte[] incomingData = new byte[4096];
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-                byte[] j = incomingPacket.getData();
                 socket.receive(incomingPacket);
 
 
 
-                // Hand the packet off to a worker thread using a lambda
+                // Hand the packet off to a worker thread 
                 threadPool.submit(() -> handleClientPacket(incomingPacket));
 
             } catch (IOException e) {
@@ -59,9 +66,21 @@ public class Server {
                 // Check if the packet is the most recent one
                 if (receivedPacket.getTimestamp() > lastPacketTime[id]) {
                     lastPacketTime[id] = receivedPacket.getTimestamp();
-                    clientIsAlive[id] = true;
                     lastSeen[id] = System.currentTimeMillis();
-                    System.out.println("Good news! Client " + (id + 1) + " is alive.");
+
+                    if(!clientIsAlive[id]){
+                        System.out.println("Good news! Client " + (id + 1) + " is back alive.");
+                        clientIsAlive[id] = true;    
+                    }
+
+                    // set the file list's files by replacing the old file listing with the new one
+                    allFiles.get(id).clear();
+                    allFiles.get(id).addAll(receivedPacket.getClientFiles());
+                    System.out.println("Client " + (id + 1) + " currently has files: ");
+                    for(int i = 0; i < allFiles.get(id).size(); i++){
+                        System.out.print(allFiles.get(id).get(i) + ", ");
+                    }
+                    System.out.println();
 
                     // Send acknowledgment response to the client
                     sendAcknowledgment(packet.getAddress(), packet.getPort());
@@ -81,7 +100,7 @@ public class Server {
 
     private void sendAcknowledgment(InetAddress clientIP, int clientPort) {
         try {
-            TOW responsePacket = new TOW(clientIP, clientPort, clientIsAlive);
+            TOW responsePacket = new TOW(clientIP, clientPort, clientIsAlive, allFiles);
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             ObjectOutputStream obj = new ObjectOutputStream(bytes);
             obj.writeObject(responsePacket);
