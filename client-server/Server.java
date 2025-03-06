@@ -11,10 +11,9 @@ public class Server {
     private boolean[] clientIsAlive = new boolean[MAX_CLIENTS]; // Tracks which clients are alive
     private long[] lastSeen = new long[MAX_CLIENTS]; // Tracks last time each client was seen
     private long[] lastPacketTime = new long[MAX_CLIENTS]; // Tracks last packet timestamp per client
-    //private InetAddress[] IPs = new InetAddress[MAX_CLIENTS]; // Tracks client IPs
-    private ArrayList<ArrayList<String>> allFiles = new ArrayList<ArrayList<String>>();
-
-
+    private InetAddress[] IPs = new InetAddress[MAX_CLIENTS]; // Tracks client IPs
+    private int[] ports = new int[MAX_CLIENTS]; // Tracks ports
+    private ArrayList<ArrayList<String>> allFiles = new ArrayList<ArrayList<String>>(); // Stores the file listing
 
     public Server(int port, int threadPoolSize) throws SocketException, UnknownHostException {
         socket = new DatagramSocket(port);
@@ -24,6 +23,7 @@ public class Server {
             clientIsAlive[i] = false;
             lastSeen[i] = System.currentTimeMillis();
             lastPacketTime[i] = 0; // Ensures the first arriving packets are always considered the newest ones
+            loadPeerAddresses("addresses.txt");
         }
 
         for(int i = 0; i < MAX_CLIENTS; i++){
@@ -36,15 +36,13 @@ public class Server {
 
         while (true) {
             try {
+
                 byte[] incomingData = new byte[4096];
                 DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
                 socket.receive(incomingPacket);
 
-
-
-                // Hand the packet off to a worker thread 
+                // Hand the packet off to a thread ("hey, my cousin will help you out here, i need to keep listening for other clients")
                 threadPool.submit(() -> handleClientPacket(incomingPacket));
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -54,7 +52,7 @@ public class Server {
 
     private synchronized void handleClientPacket(DatagramPacket packet) {
         try {
-            // Deserialize the received TOW object
+            // Deserialize the received TOW
             ByteArrayInputStream byteStream = new ByteArrayInputStream(packet.getData(), 0, packet.getLength());
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             TOW receivedPacket = (TOW) objectStream.readObject();
@@ -82,9 +80,12 @@ public class Server {
                     }
                     System.out.println();
 
-                    // Send acknowledgment response to the client
-                    sendAcknowledgment(packet.getAddress(), packet.getPort());
-
+                    // Send update to all clients
+                    for(int i = 0; i < MAX_CLIENTS; i++){
+                        sendStatusUpdate(IPs[i], ports[i]);
+                    
+                    }
+                    System.out.println("Updated server and file listing sent to clients.");    
                 } else {
                     // Ignore any outdated packets
                     System.out.println("Received an outdated packet from Client " + (id + 1) + ". Ignoring.");
@@ -98,7 +99,7 @@ public class Server {
         }
     }
 
-    private void sendAcknowledgment(InetAddress clientIP, int clientPort) {
+    private void sendStatusUpdate(InetAddress clientIP, int clientPort) {
         try {
             TOW responsePacket = new TOW(clientIP, clientPort, clientIsAlive, allFiles);
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -109,8 +110,6 @@ public class Server {
 
             DatagramPacket response = new DatagramPacket(responseData, responseData.length, clientIP, clientPort);
             socket.send(response);
-            System.out.println("Acknowledgment sent to Client at " + clientIP + ":" + clientPort);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -123,6 +122,25 @@ public class Server {
                 clientIsAlive[i] = false;
                 System.out.println("Client " + (i + 1) + " marked as DEAD due to timeout.");
             }
+        }
+    }
+
+    private void loadPeerAddresses(String filename) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            int i = 0;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.trim().split("\\s+"); // Split by space or tab
+                if (parts.length == 2) {
+                    String ip = parts[0];
+                    int port = Integer.parseInt(parts[1]);
+                    IPs[i] = InetAddress.getByName(ip);
+                    ports[i] = port; 
+                    i++;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading peer config file: " + e.getMessage());
         }
     }
 

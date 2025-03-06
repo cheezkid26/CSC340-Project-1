@@ -1,6 +1,6 @@
-localhost 5000
-localhost 5000
-localhost 5000
-localhost 5000
-localhost 5000
-localhost 5000
+localhost 9876
+10.0.0.190 9875
+localhost 9874
+localhost 9873
+localhost 9872
+localhost 9871
