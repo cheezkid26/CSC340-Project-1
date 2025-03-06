@@ -82,9 +82,19 @@ public class Peer {
                     }
 
                     for(int i = 0; i < MAX_PEERS; i++){
-                        System.out.println("Peer " + (i + 1) + " has files: ");
-                        for(int j = 0; j <)
+                        if(peerIsAlive[i]){
+                            System.out.println("Peer " + (i + 1) + " (alive) has files: ");
+                            for(int j = 0; j < allFiles.get(i).size(); j++){
+                                System.out.print(allFiles.get(i).get(j) + ", ");
+                            }
+                        }else{
+                            System.out.println("Peer " + (i + 1) + " (dead)'s last known files: ");
+                            for(int j = 0; j < allFiles.get(i).size(); j++){
+                                System.out.print(allFiles.get(i).get(j) + ", ");
+                            }
+                        }
                     }
+                    System.out.println();
         
 
                 } catch (Exception e) {
