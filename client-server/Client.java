@@ -21,7 +21,7 @@ public class Client {
 
     public Client(int id) throws IOException {
         this.clientIdentifier = id;
-        this.serverAddress = /*InetAddress.getByName("10.0.0.190");*/ InetAddress.getByName("localhost");
+        this.serverAddress = InetAddress.getByName("10.0.0.33"); //InetAddress.getByName("localhost");
         this.socket = new DatagramSocket();
         this.lastContact = System.currentTimeMillis();
         this.serverIsDead = false;
