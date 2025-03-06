@@ -6,6 +6,7 @@ import java.net.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 public class TOW implements Serializable {
     private final String protocolName = "TOW";
@@ -24,11 +25,13 @@ public class TOW implements Serializable {
     private byte[] dataBytes;
     private int dataLength;
 
+    private ArrayList<String> clientFiles;
+    private ArrayList<ArrayList<String>> allFiles;
 
     private boolean[] clientStatus = new boolean[6];
 
     //sent from client
-    public TOW(int identifier, InetAddress destIP, int destPort, String data) throws UnknownHostException{
+    public TOW(int identifier, InetAddress destIP, int destPort, String data, ArrayList<String> clientFiles) throws UnknownHostException{
         this.IP = InetAddress.getLocalHost();
         this.length = new byte[2048];
         this.identifier = identifier;
@@ -41,10 +44,11 @@ public class TOW implements Serializable {
         this.data = data;
         this.dataBytes = data.getBytes();
         this.dataLength = dataBytes.length;
+        this.clientFiles = clientFiles;
     }
 
     //response from server
-    public TOW(InetAddress destIP, int destPort, boolean[] aliveClients) throws UnknownHostException{
+    public TOW(InetAddress destIP, int destPort, boolean[] aliveClients, ArrayList<ArrayList<String>> allFiles) throws UnknownHostException{
         this.IP = InetAddress.getLocalHost();
         this.length = new byte[2048];
         this.identifier = 0;
@@ -58,6 +62,7 @@ public class TOW implements Serializable {
         this.dataBytes = data.getBytes();
         this.dataLength = dataBytes.length;
         this.clientStatus = aliveClients;
+        this.allFiles = allFiles;
     }
         /* 
         this.length = new byte[2048];
@@ -128,6 +133,14 @@ public class TOW implements Serializable {
 
     public boolean[] getClientStatuses(){
         return clientStatus;
+    }
+
+    public ArrayList<String> getClientFiles(){
+        return this.clientFiles;
+    }
+
+    public ArrayList<ArrayList<String>> getAllFiles(){
+        return this.allFiles;
     }
 
     public String readableTimestamp(){
