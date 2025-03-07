@@ -23,7 +23,7 @@ public class Server {
             clientIsAlive[i] = false;
             lastSeen[i] = System.currentTimeMillis();
             lastPacketTime[i] = 0; // Ensures the first arriving packets are always considered the newest ones
-            loadPeerAddresses("addresses.txt");
+            loadClientAddresses("addresses.txt");
         }
 
         for(int i = 0; i < MAX_CLIENTS; i++){
@@ -81,10 +81,7 @@ public class Server {
                     System.out.println();
 
                     // Send update to all clients
-                    for(int i = 0; i < MAX_CLIENTS; i++){
-                        sendStatusUpdate(IPs[i], ports[i]);
-                    
-                    }
+                    sendStatusUpdate();
                     System.out.println("Updated server and file listing sent to clients.");    
                 } else {
                     // Ignore any outdated packets
@@ -99,17 +96,19 @@ public class Server {
         }
     }
 
-    private void sendStatusUpdate(InetAddress clientIP, int clientPort) {
+    private void sendStatusUpdate() {
         try {
-            TOW responsePacket = new TOW(clientIP, clientPort, clientIsAlive, allFiles);
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            ObjectOutputStream obj = new ObjectOutputStream(bytes);
-            obj.writeObject(responsePacket);
-            obj.flush();
-            byte[] responseData = bytes.toByteArray();
+            for(int i = 0; i < MAX_CLIENTS; i++){
+                TOW responsePacket = new TOW(IPs[i], ports[i], clientIsAlive, allFiles);
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                ObjectOutputStream obj = new ObjectOutputStream(bytes);
+                obj.writeObject(responsePacket);
+                obj.flush();
+                byte[] responseData = bytes.toByteArray();
 
-            DatagramPacket response = new DatagramPacket(responseData, responseData.length, clientIP, clientPort);
-            socket.send(response);
+                DatagramPacket response = new DatagramPacket(responseData, responseData.length, IPs[i], ports[i]);
+                socket.send(response);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -125,7 +124,7 @@ public class Server {
         }
     }
 
-    private void loadPeerAddresses(String filename) {
+    private void loadClientAddresses(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             int i = 0;
