@@ -10,7 +10,7 @@ public class Peer {
     private int peerIdentifier;
     private static SecureRandom random = new SecureRandom();
     private final int MAX_PEERS = 6;
-    private final long TIMEOUT = 30000; // 30 seconds timeout
+    private final long TIMEOUT = 35000; // 35 seconds timeout
     private boolean[] peerIsAlive = new boolean[MAX_PEERS];
     private InetAddress[] peerAddresses = new InetAddress[MAX_PEERS];
     private int[] peerPorts = new int[MAX_PEERS];
@@ -28,6 +28,7 @@ public class Peer {
             lastContact[i] = 0;
             peerIsAlive[i] = false;
         }
+        peerIsAlive[id - 1] = true; //sets itself to consider itself alive
         this.threadPool = Executors.newFixedThreadPool(MAX_PEERS); // Thread pool with a number of threads of the max peers - for instance, 5 means 5 threads for handling other peers and a 6th for sending packet
 
         // Initializes allFiles properly
@@ -87,14 +88,16 @@ public class Peer {
                             for(int j = 0; j < allFiles.get(i).size(); j++){
                                 System.out.print(allFiles.get(i).get(j) + ", ");
                             }
+                            System.out.println();
                         }else{
                             System.out.println("Peer " + (i + 1) + " (dead)'s last known files: ");
                             for(int j = 0; j < allFiles.get(i).size(); j++){
                                 System.out.print(allFiles.get(i).get(j) + ", ");
                             }
+                            System.out.println();
                         }
                     }
-                    System.out.println();
+                    
         
 
                 } catch (Exception e) {
