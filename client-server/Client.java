@@ -21,15 +21,15 @@ public class Client {
 
     public Client(int id) throws IOException {
         this.clientIdentifier = id;
-        this.serverAddress = /*InetAddress.getByName("10.0.0.190");*/ InetAddress.getByName("localhost");
-        this.socket = new DatagramSocket();
+        this.serverAddress = InetAddress.getByName("10.0.0.190");// InetAddress.getByName("localhost");
+        this.socket = new DatagramSocket(9876);
         this.lastContact = System.currentTimeMillis();
         this.serverIsDead = false;
         this.threadPool = Executors.newFixedThreadPool(2); // Thread pool with 2 threads
 
         // Initialize client status
         for (int i = 0; i < MAX_CLIENTS; i++) {
-            clientIsAlive[i] = (i == id - 1);
+            clientIsAlive[i] = false;
         }
     }
 

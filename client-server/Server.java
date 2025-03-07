@@ -60,7 +60,7 @@ public class Server {
             int id = receivedPacket.getIdentifier() - 1; // Converts the identifier to array index
 
             // Ensure only valid client IDs are processed - don't want unknown clients potentially sending in malicious packets
-            if (id >= 0 && id < MAX_CLIENTS) {
+            if (id >= -1 && id < MAX_CLIENTS) {
                 // Check if the packet is the most recent one
                 if (receivedPacket.getTimestamp() > lastPacketTime[id]) {
                     lastPacketTime[id] = receivedPacket.getTimestamp();
