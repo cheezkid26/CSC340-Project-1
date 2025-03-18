@@ -21,15 +21,20 @@ public class Client {
 
     public Client(int id) throws IOException {
         this.clientIdentifier = id;
-        this.serverAddress = InetAddress.getByName("10.0.0.33"); //InetAddress.getByName("localhost");
-        this.socket = new DatagramSocket();
+        this.serverAddress = InetAddress.getByName("localhost");// InetAddress.getByName("localhost");
+        this.socket = new DatagramSocket(9875);
         this.lastContact = System.currentTimeMillis();
         this.serverIsDead = false;
         this.threadPool = Executors.newFixedThreadPool(2); // Thread pool with 2 threads
+        this.allFiles = new ArrayList<ArrayList<String>>();
 
         // Initialize client status
         for (int i = 0; i < MAX_CLIENTS; i++) {
-            clientIsAlive[i] = (i == id - 1);
+            clientIsAlive[i] = false;
+        }
+
+        for(int i = 0; i < MAX_CLIENTS; i++){
+            allFiles.add(new ArrayList<String>());
         }
     }
 
@@ -93,9 +98,16 @@ public class Client {
                     ObjectInputStream objectInputStream = new ObjectInputStream(byteInputStream);
                     TOW receivedPacket = (TOW) objectInputStream.readObject();
 
-                    allFiles = receivedPacket.getAllFiles();
-                    clientIsAlive = receivedPacket.getClientStatuses();
+                    ArrayList tempFiles = receivedPacket.getAllFiles();
+                    boolean[] tempIsAlive = receivedPacket.getClientStatuses();
                     lastContact = receivedPacket.getTimestamp();
+
+                    if(tempFiles != null){
+                        allFiles = tempFiles;
+                    }
+                    if(tempIsAlive != null){
+                        clientIsAlive = tempIsAlive;
+                    }
 
                     System.out.println(receivedPacket.getString());
 
