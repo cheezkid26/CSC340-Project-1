@@ -98,7 +98,7 @@ public class Client {
                     ObjectInputStream objectInputStream = new ObjectInputStream(byteInputStream);
                     TOW receivedPacket = (TOW) objectInputStream.readObject();
 
-                    ArrayList tempFiles = receivedPacket.getAllFiles();
+                    ArrayList<ArrayList<String>> tempFiles = receivedPacket.getAllFiles();
                     boolean[] tempIsAlive = receivedPacket.getClientStatuses();
                     lastContact = receivedPacket.getTimestamp();
 
