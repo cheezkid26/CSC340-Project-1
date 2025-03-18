@@ -28,6 +28,7 @@ public class Peer {
             lastContact[i] = 0;
             peerIsAlive[i] = false;
         }
+        peerFiles = getFileNames(); //reads in own files
         peerIsAlive[id - 1] = true; //sets itself to consider itself alive
         this.threadPool = Executors.newFixedThreadPool(MAX_PEERS); // Thread pool with a number of threads of the max peers - for instance, 5 means 5 threads for handling other peers and a 6th for sending packet
 
@@ -35,6 +36,8 @@ public class Peer {
         for(int i = 0; i < MAX_PEERS; i++){
             allFiles.add(new ArrayList<String>());
         }
+        
+        allFiles.get(id - 1).addAll(peerFiles);
     }
 
     public void start() {

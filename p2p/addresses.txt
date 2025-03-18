@@ -1,5 +1,5 @@
-10.0.2.15 9875
-10.0.2.15 9874
+localhost 9875
+localhost 9874
 localhost 9873
 localhost 9872
 192.168.185.199 9871
